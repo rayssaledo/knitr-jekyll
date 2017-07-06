@@ -1,10 +1,3 @@
----
-layout: post
-title:  "Serve Jekyll Websites with servr and knitr"
-categories: [jekyll, rstats]
-tags: [knitr, servr, httpuv, websocket]
----
-
 The R package [**servr**](https://github.com/yihui/servr) can be used to set up an HTTP server to serve files under a directory. Since **servr** v0.2, it has added a function `servr::jekyll()` specifically designed for websites based on Jekyll and R Markdown. The main features of this function are:
 
 1. R Markdown source files are re-compiled through [**knitr**](http://yihui.name/knitr) when their corresponding Markdown output files become older[^1] than source files;
@@ -22,7 +15,7 @@ You must have installed the packages **servr** (>= 0.2) and **knitr** (>= 1.8).
 
 
 {% highlight r %}
-install.packages(c("servr", "knitr"), repos = "http://cran.rstudio.com")
+install.packages(c('servr', 'knitr'), repos = 'http://cran.rstudio.com')
 {% endhighlight %}
 
 Of course, you have to install [Jekyll](http://jekyllrb.com) as well. For Windows users, you have to make sure `jekyll` can be found from your environment variable `PATH`, i.e., R can call it via `system('jekyll')`. This is normally not an issue for Linux or Mac OS X users (`gem install jekyll` is enough).
@@ -81,8 +74,7 @@ knitr::kable(head(mtcars))
 
 {% highlight r %}
 (function() {
-    if (TRUE) 
-        1 + 1  # a boring comment
+  if (TRUE) 1 + 1  # a boring comment
 })()
 {% endhighlight %}
 
@@ -111,11 +103,11 @@ Just to test inline R expressions[^2] in **knitr**, we know the first element in
 
 
 {% highlight r %}
-par(mar = c(4, 4, 0.1, 0.1))
-plot(cars, pch = 19, col = "red")  # a scatterplot
+par(mar = c(4, 4, .1, .1))
+plot(cars, pch = 19, col = 'red')  # a scatterplot
 {% endhighlight %}
 
-![A scatterplot of the cars data](http://db.yihui.name/jekyll/2014-09-28-jekyll-with-knitr/cars-1.png) 
+![A scatterplot of the cars data](/portfolio-analisesfigure/source/_site/2014-09-28-jekyll-with-knitr/cars-1.png)
 
 ## The build script
 
@@ -123,8 +115,9 @@ Zero-configuration is required for `servr::jekyll()` to work on your Jekyll webs
 
 
 {% highlight r %}
-jekyll(dir = ".", input = c(".", "_source", "_posts"), output = c(".", 
-    "_posts", "_posts"), script = c("Makefile", "build.R"), serve = TRUE, 
+jekyll(dir = ".", input = c(".", "_source", "_posts"),
+    output = c(".", "_posts", "_posts"),
+    script = c("Makefile", "build.R"), serve = TRUE,
     command = "jekyll build", ...)
 {% endhighlight %}
 
@@ -136,7 +129,7 @@ The `script` argument specifies a Makefile or an R script to be used to compile 
 
     Rscript build.R arg1 arg2
 
-See `?servr::jekyll` for more details. You can define all your **knitr** options and any other options in this R script. See the script [build.R](https://github.com/yihui/knitr-jekyll/blob/gh-pages/build.R) in the knitr-jekyll repository for an example: it will automatically set up the output renderers for **knitr**, e.g., when the Jekyll Markdown engine is `kramdown`, this script will call `knitr::render_jekyll()` so that the code chunk output will be put inside the Liquid tag `{% raw %}{% highlight lang %} {% endhighlight %}{% endraw %}`; it also sets up some **knitr** chunk and package options so that figures can be displayed correctly. For those who do not wish to store images in GIT (because normally they are binary files), you may check out how I host my images in Dropbox for this repository (see the code below `Sys.getenv('USER') == 'yihui'`).
+See `?servr::jekyll` for more details. You can define all your **knitr** options and any other options in this R script. See the script [build.R](https://github.com/yihui/knitr-jekyll/blob/gh-pages/build.R) in the knitr-jekyll repository for an example: it will automatically set up the output renderers for **knitr**, e.g., when the Jekyll Markdown engine is `kramdown`, this script will call `knitr::render_jekyll()` so that the code chunk output will be put inside the Liquid tag `{% highlight lang %} {% endhighlight %}`; it also sets up some **knitr** chunk and package options so that figures can be displayed correctly. For those who do not wish to store images in GIT (because normally they are binary files), you may check out how I host my images in Dropbox for this repository (see the code below `Sys.getenv('USER') == 'yihui'`).
 
 ## On the Markdown renderers
 

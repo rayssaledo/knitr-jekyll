@@ -1,0 +1,299 @@
+---
+title: "Análise de filmes e seus personagens"
+date: "23 de junho de 2017"
+output: html_document
+---
+
+
+
+
+
+#Tipos de filmes
+Vamos verificar a existência de tipos de filmes quanto a mediana da idade dos homens e das mulheres, quantidade de homens, quantidade de mulheres. Será que existem grupos que definem comportamentos comuns para os filmes disponibilizados? Utilizaremos os dados disponíveis no seguinte endereço: https://github.com/nazareno/tamanhos-da-ufcg.
+
+
+#Definindo as variáveis a serem utilizadas 
+
+Neste post iremos utilizar 4 variáveis que foram calculadas a partir dos dados disponibilizados pelo endereço do Github acima. As variáveis são as seguintes: mediana da idade dos homens e mulheres, a quantidade de homens e de mulheres que participaram dos filmes. 
+
+
+
+{% highlight r %}
+filmes <- read.csv("../dados/meta_data7.csv")
+personagens <- read.csv("../dados/character_list5.csv")
+
+tabela_juncao <- left_join(filmes, personagens, "script_id")
+
+mulheres = tabela_juncao %>%
+  filter(gender == 'f',age != 'NULL') %>%
+  mutate(age = as.integer(age)) %>%
+  group_by(script_id, imdb_id, title, year, gross) %>%
+  summarise(n_f=n(), age_f=median(age)) %>% 
+  filter(n_f > 1)
+
+homens = tabela_juncao %>%
+  filter(gender == 'm',age != 'NULL') %>%
+  mutate(age = as.integer(age)) %>%
+  group_by(script_id, imdb_id, title, year, gross) %>%
+  summarise(n_m=n(), age_m=median(age)) %>% 
+  filter(n_m > 1)
+
+dados = merge(mulheres, homens, 
+                           by=c('script_id','imdb_id','title','year','gross'))
+duplicados = dados %>%
+  group_by(title) %>% filter(row_number() > 1)
+
+dados = dados %>% 
+  filter(!(title %in% duplicados$title))
+  
+dados = dados %>%
+  subset(select = -c(script_id,imdb_id,year,gross))
+{% endhighlight %}
+
+Como existiam valores nulos na variável 'age'(idade), filtrei os dados retirando-os, pois não faz sentido para a análise utilizar personagens com idade nula.  
+
+
+#Distribuição e correlação entre as dimensões
+
+Agora vamos analisar as distribuições de cada variável e a correlação entre elas, para melhor entendimento dos dados que estamos utilizando.
+
+
+{% highlight r %}
+dw = dados
+
+dw %>% 
+    select(-title) %>% 
+    ggpairs(columnLabels = c("Qtd_mulher",
+                           "Idade_mulher",
+                           "Qtd_homem",
+                           "Idade_homem"), 
+          title = "Distribuição das dimensões e correlação entre as variáveis")
+{% endhighlight %}
+
+![plot of chunk unnamed-chunk-3](/portfolio-analisesfigure/source/Problema3-CP1/Problema3-CP2/unnamed-chunk-3-1.png)
+
+
+Analisando o gráfico acima podemos descobrir que o número de homens é maior que o das mulheres e que a maioria das mulheres tem menos de 50 anos, enquanto a idade dos homens está mais balanceada. Podemos também afirmar que essas variáveis não possuem uma correlação linear, ou seja, elas não dependem uma da outra, podemos saber disso porque os valores das correlações mostradas acima da linha diagonal estão bem próximos de zero, portanto, essas variáveis não possuem nenhum correlação nem negativa e nem positiva.
+
+Podemos fazer a mesma análise feita no gráfico acima, com o sumário gerado abaixo, composto do nome dos filmes, e valores como média e mediana para cada variável.
+
+
+{% highlight r %}
+summary(dw)
+{% endhighlight %}
+
+
+
+{% highlight text %}
+##                         title           n_f             age_f      
+##  (500) Days of Summer      :   1   Min.   : 2.000   Min.   :10.00  
+##  10 Things I Hate About You:   1   1st Qu.: 2.000   1st Qu.:34.00  
+##  12 and Holding            :   1   Median : 3.000   Median :40.00  
+##  12 Years a Slave          :   1   Mean   : 3.417   Mean   :41.09  
+##  1492: Conquest of Paradise:   1   3rd Qu.: 4.000   3rd Qu.:47.50  
+##  15 Minutes                :   1   Max.   :14.000   Max.   :92.00  
+##  (Other)                   :1444                                   
+##       n_m             age_m      
+##  Min.   : 2.000   Min.   : 8.00  
+##  1st Qu.: 4.000   1st Qu.:42.00  
+##  Median : 6.000   Median :48.50  
+##  Mean   : 6.563   Mean   :47.96  
+##  3rd Qu.: 8.000   3rd Qu.:54.00  
+##  Max.   :26.000   Max.   :82.00  
+## 
+{% endhighlight %}
+
+Para uma melhor visualização dos dados podemos observar a distribuição de cada uma das dimensões na escala logarítmica.
+
+
+{% highlight r %}
+# Escala de log 
+dw2 <- dw %>% 
+    mutate_each(funs(log), 2:5)
+
+dw2 %>% 
+    select(-title) %>% 
+    ggpairs(columnLabels = c("Qtd_mulher",
+                           "Idade_mulher",
+                           "Qtd_homem",
+                           "Idade_homem"), 
+          title = "Distribuição das dimensões e correlação entre as variáveis")
+{% endhighlight %}
+
+![plot of chunk unnamed-chunk-5](/portfolio-analisesfigure/source/Problema3-CP1/Problema3-CP2/unnamed-chunk-5-1.png)
+
+{% highlight r %}
+summary(select(dw2, -title))
+{% endhighlight %}
+
+
+
+{% highlight text %}
+##       n_f             age_f            n_m             age_m      
+##  Min.   :0.6931   Min.   :2.303   Min.   :0.6931   Min.   :2.079  
+##  1st Qu.:0.6931   1st Qu.:3.526   1st Qu.:1.3863   1st Qu.:3.738  
+##  Median :1.0986   Median :3.689   Median :1.7918   Median :3.882  
+##  Mean   :1.1393   Mean   :3.683   Mean   :1.7643   Mean   :3.844  
+##  3rd Qu.:1.3863   3rd Qu.:3.861   3rd Qu.:2.0794   3rd Qu.:3.989  
+##  Max.   :2.6391   Max.   :4.522   Max.   :3.2581   Max.   :4.407
+{% endhighlight %}
+
+A diferença que podemos notar em relação ao gráfico mostrado anteriormente é que a distribuição da idade tanto dos homens quanto das mulheres mudaram consideravelmente. Pelo sumário podemos descobrir que a media da idade entre eles é bem semelhante.
+
+Depois de ter visto os dados na escala logarítimica, podemos visualizá-los também de forma padronizada, a partir do gráfico abaixo:
+
+
+{% highlight r %}
+#Dados padronizados
+dw2.scaled = dw2 %>% 
+  mutate_each(funs(as.vector(scale(.))), 2:5)
+
+summary(dw2.scaled)
+{% endhighlight %}
+
+
+
+{% highlight text %}
+##                         title           n_f          
+##  (500) Days of Summer      :   1   Min.   :-1.09179  
+##  10 Things I Hate About You:   1   1st Qu.:-1.09179  
+##  12 and Holding            :   1   Median :-0.09968  
+##  12 Years a Slave          :   1   Mean   : 0.00000  
+##  1492: Conquest of Paradise:   1   3rd Qu.: 0.60423  
+##  15 Minutes                :   1   Max.   : 3.66955  
+##  (Other)                   :1444                     
+##      age_f              n_m               age_m        
+##  Min.   :-5.3087   Min.   :-2.17429   Min.   :-7.3222  
+##  1st Qu.:-0.6041   1st Qu.:-0.76724   1st Qu.:-0.4428  
+##  Median : 0.0207   Median : 0.05583   Median : 0.1542  
+##  Mean   : 0.0000   Mean   : 0.00000   Mean   : 0.0000  
+##  3rd Qu.: 0.6813   3rd Qu.: 0.63981   3rd Qu.: 0.5998  
+##  Max.   : 3.2227   Max.   : 3.03241   Max.   : 2.3329  
+## 
+{% endhighlight %}
+
+
+
+{% highlight r %}
+dw2.scaled %>% 
+    select(-title) %>% 
+    ggpairs(columnLabels = c("Qtd_mulher",
+                           "Idade_mulher",
+                           "Qtd_homem",
+                           "Idade_homem"), 
+          title = "Distribuição das dimensões e correlação entre as variáveis")
+{% endhighlight %}
+
+![plot of chunk unnamed-chunk-6](/portfolio-analisesfigure/source/Problema3-CP1/Problema3-CP2/unnamed-chunk-6-1.png)
+
+Quando os dados estão normalizados passamos a tratar a média dos dados com valor zero, pois agora eles passam a se comportar como a distribuição normal e estarão na mesma escala, facilitando desta forma a análise dos gráficos de agrupamento.
+
+#Escolhendo o número de grupos
+
+Antes de realizar o agrupamento dos filmes, precisamos decidir qual a melhor quantidade de grupos pela qual os filmes serão agrupados, para que eles sejam realmente o mais semelhantes entre si dentro do seu grupo.
+
+
+{% highlight r %}
+set.seed(123)
+explorando_k = tibble(k = 1:15) %>% 
+    group_by(k) %>% 
+    do(
+        kmeans(select(dw2.scaled, -title), 
+               centers = .$k, 
+               nstart = 20) %>% glance()
+    )
+{% endhighlight %}
+
+
+
+{% highlight text %}
+## Warning: did not converge in 10 iterations
+{% endhighlight %}
+
+
+
+{% highlight r %}
+explorando_k %>% 
+    ggplot(aes(x = k, y = betweenss / totss)) + 
+    geom_line() + 
+    geom_point()
+{% endhighlight %}
+
+![plot of chunk unnamed-chunk-7](/portfolio-analisesfigure/source/Problema3-CP1/Problema3-CP2/unnamed-chunk-7-1.png)
+
+De acordo com o gráfico acima é possível verificar que a melhor quantidade de grupos será 4, pois a partir do quinto ponto do gráfico a distância para de crescer.
+
+
+#Agrupamento dos filmes utilizando o algoritmo k-means
+
+Depois de ter definido o melhor número de grupos para os filmes, chegou a hora de realizar o agrupamento de fato e analisar cada grupo para assim conseguir nomeá-los de acordo com suas características. 
+
+
+{% highlight r %}
+# O agrupamento:
+km = dw2.scaled %>% 
+    select(-title) %>% 
+    kmeans(centers = 4, nstart = 20)
+
+# O df em formato longo, para visualização 
+dw2.scaled.km.long = km %>% 
+    augment(dw2.scaled) %>% # Adiciona o resultado de km 
+                            # aos dados originais dw2.scaled em 
+                            # uma variável chamada .cluster
+    gather(key = "variável", 
+           value = "valor", 
+           -title, -.cluster) # = move para long todas as 
+                                            # variávies menos repository_language 
+                                            # e .cluster
+dw2.scaled.km.long %>% 
+    ggplot(aes(x = `variável`, y = valor, group = title, colour = .cluster)) + 
+    #geom_point(alpha = 0.2) + 
+    geom_line(alpha = .5) + 
+    facet_wrap(~ .cluster) 
+{% endhighlight %}
+
+![plot of chunk unnamed-chunk-8](/portfolio-analisesfigure/source/Problema3-CP1/Problema3-CP2/unnamed-chunk-8-1.png)
+
+
+Observando o gráfico acima podemos nomear os grupos da seguinte maneira:
+1) Grupo 1: podemos ver que a idade dos homens é bem dispersa e que a quantidade de homens e mulheres nos filmes são bem próximas. Este grupo pode ser chamado de "Filme com homens de todas as idades".
+
+2) Grupo 2: é caracterizado por ter um maior número de mulheres e por ter uma faixa de idade entre homens e mulheres bem semelhantes. Pode ser denominado de "Mulheres sim senhor!".
+
+3) Grupo 3: é caracterizado por ter um número maior de homens e as idades entre os gêneros semelhantes. Um nome característico para esse grupo é "Homens sim senhor!".
+
+4) Grupo 4: neste grupo o número de homens é inferior ao das mulheres e os homens são mais jovens ou têm a mesma idade das mulheres. Pode ser denominado de "Filme com mulheres mais experientes".
+
+
+Para finalizar podemos observar em um único gráfico a junção dos grupos mostrados acima. Este gráfico é bem iterativo, é possível modificar a ordem das dimensões, por exemplo.
+
+
+{% highlight r %}
+p <- km %>% 
+    augment(dw2.scaled) %>%
+    plot_ly(type = 'parcoords',
+            line = list(color = ~.cluster, 
+                        showScale = TRUE),
+            dimensions = list(
+                list(range = c(-3, 3),
+                     label = 'Qtd de mulheres', values = ~n_f),
+                list(range = c(-3, 3),
+                     label = 'Idade das mulheres', values = ~age_f),
+                list(range = c(-6, 3),
+                     label = 'Qtd de homens', values = ~n_m),
+                list(range = c(-2, 3),
+                     label = 'Idade dos homens', values = ~age_m)
+            )
+    )
+p
+{% endhighlight %}
+
+
+
+{% highlight text %}
+## Error in loadNamespace(name): there is no package called 'webshot'
+{% endhighlight %}
+
+
+
+
