@@ -13,7 +13,7 @@ library("tidyr")
 library("readr")
 ```
 
-```{r,  message=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 dados <- read_csv("../dados/series_from_imdb.csv")
 subconjunto <- dados %>% filter(series_name %in% c("13 Reasons Why", "Dexter", "Prison Break"))
 ```
@@ -27,7 +27,7 @@ Para verificar qual dentre as séries (13 Reasons Why, Dexter e Prison Break) é
 
 ##13 Reasons Why
 
-```{r}
+```{r, echo=FALSE, warning=FALSE}
 dados %>%
   filter(series_name == "13 Reasons Why") %>%
     ggplot(aes(x = UserRating)) + 
@@ -38,14 +38,14 @@ dados %>%
 
 Com as informações mostradas no histograma acima, podemos perceber visualmente que a maior frequência está na classificação 8.5. Para confirmarmos esta afirmação verificamos a mediana da série ‘13 Reason Why’ através do boxplot…
 
-```{r}
+```{r, echo=FALSE, warning=FALSE}
 boxplot((dados %>%  filter(series_name == "13 Reasons Why"))$UserRating)
 ```
 
 
 E também podemos verificar através do sumário, a média (8.669) e a mediana (8.500)
 
-```{r}
+```{r, echo=FALSE, warning=FALSE}
 summary((dados %>%  filter(series_name == "13 Reasons Why"))$UserRating)
 ```
 
@@ -54,7 +54,7 @@ summary((dados %>%  filter(series_name == "13 Reasons Why"))$UserRating)
 
 Da mesma forma que foi realizado com a série acima, é preciso fazer com as demais. O histograma mostra que a média da nota dos usuários foi aproximadamente 9.
 
-```{r}
+```{r, echo=FALSE, warning=FALSE}
 dados %>%
   filter(series_name == "Dexter") %>%
     ggplot(aes(x = UserRating)) + 
@@ -65,14 +65,14 @@ dados %>%
 
 Como podemos perceber no boxplot, há existência de outliers (‘ponto fora da curva’) que corresponde a um ponto que está muito distante das demais observações. Ele pode indicar que há muita variação dos dados ou algum erro de mensuração. Para tratar esses outliers é preciso utilizar uma estatística mais robusta: a mediana.
 
-```{r}
+```{r, echo=FALSE, warning=FALSE}
 boxplot((dados %>%  filter(series_name == "Dexter"))$UserRating)
 ```
 
 
 Como a mediana consegue desconsiderar os pontos fora da curva, podemos observar com a maior exatidão os dados, no caso dessa série tem-se como mediana igual a 8.700.
 
-```{r}
+```{r, echo=FALSE, warning=FALSE}
 summary((dados %>%  filter(series_name == "Dexter"))$UserRating)
 ```
 
@@ -82,7 +82,7 @@ Da mesma forma que foi realizado com as demais séries, é preciso analisar as i
 
 O histograma mostra que a média da nota dos usuários foi aproximadamente 8.5.
 
-```{r}
+```{r, echo=FALSE, warning=FALSE}
 dados %>%
   filter(series_name == "Prison Break") %>%
     ggplot(aes(x = UserRating)) + 
@@ -93,14 +93,14 @@ dados %>%
 
 Como podemos perceber no boxplot, a mediana mostra um valor um pouco acima de 8.5.
 
-```{r}
+```{r, echo=FALSE, warning=FALSE}
 boxplot((dados %>%  filter(series_name == "Prison Break"))$UserRating)
 ```
 
 
 Para saber com exatidão o valor da mediana utilizamos os valores fornecidos pelo sumário, neste caso essa série possui mediana 8.600.
 
-```{r}
+```{r, echo=FALSE, warning=FALSE}
 summary((dados %>%  filter(series_name == "Prison Break"))$UserRating)
 ```
 
@@ -113,7 +113,7 @@ Levando em consideração que a irregularidade na qualidade dos episódios corre
 
 ##13 Reasons Why
 
-```{r}
+```{r, echo=FALSE, warning=FALSE}
 dados %>% filter(series_name == "13 Reasons Why")  %>%
   ggplot(aes(series_ep, UserRating, color = as.factor(season))) +
   geom_line() +
@@ -124,7 +124,7 @@ dados %>% filter(series_name == "13 Reasons Why")  %>%
 
 ##Dexter
 
-```{r}
+```{r, echo=FALSE, warning=FALSE}
 dados %>% filter(series_name == "Dexter")  %>%
   ggplot(aes(series_ep, UserRating, color = as.factor(season))) +
   geom_line() +
@@ -136,7 +136,7 @@ dados %>% filter(series_name == "Dexter")  %>%
 
 ##Prison Break
 
-```{r}
+```{r, echo=FALSE, warning=FALSE}
 dados %>% filter(series_name == "Prison Break")  %>%
   ggplot(aes(series_ep, UserRating, color = as.factor(season))) +
   geom_line() +
