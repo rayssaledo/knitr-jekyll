@@ -1,8 +1,9 @@
 ---
-title: "Análise entre séries"
-author: "Rayssa"
-date: "5 de junho de 2017"
-output: html_document
+layout: post
+title: Análise entre séries
+date: `r Sys.time()`
+published: true
+tags: [htmlwidgets, r]
 ---
 
 
