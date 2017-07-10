@@ -2,7 +2,7 @@
 title: Análises desenvolvidas na disciplina AD1
 email: rayssa.ledo@ccc.ufcg.edu.br
 description: > # this means to ignore newlines until "baseurl:"
-  Site para mostrar as análises feitas durante a disciplina de Análise de Dados 1!! :)
+  Vamos lá vê algumas análises feitas durante a disciplina de Análise de Dados 1!! :)
 baseurl: "/portfolio-analises" # the subpath of your site, e.g. /blog/
 url: "https://rayssaledo.github.io/portfolio-analises/" # the base hostname & protocol for your site
 github_username:  rayssaledo
